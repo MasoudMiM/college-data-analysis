@@ -4,6 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+st.set_page_config(layout="wide")
+
 st.title("Finances for private, not-for-profit institutions in the US")
 st.write("""
 This app allows you to plot some aggregate financial data of the institutions in the US for some given categories of students.
