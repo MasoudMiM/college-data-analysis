@@ -105,7 +105,7 @@ if csv_url is not None:
         fig, axs = plt.subplots(3, 3, figsize=(15, 10))
         # increase the vertical space between the subplots
         fig.subplots_adjust(hspace=0.25)
-        fig.suptitle(f'Finances of the institutions [{subset} students] out of {df.shape[0]} institutes for state {state_name}', y=0.93)
+        fig.suptitle(f'Finances of the institutions [{subset} students] for {df.shape[0]} institutes for state {state_name}', y=0.93)
 
         sns.lineplot(data=df.dropna(), x='YR', y='F2A02', ax=axs[0, 0])
         axs[0, 0].set_ylabel('Total Assets (in million USD)')
