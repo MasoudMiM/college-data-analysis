@@ -6,9 +6,9 @@ import seaborn as sns
 
 st.set_page_config(layout="wide")
 
-st.title("Finances for private, not-for-profit institutions in the US")
+st.title("Finances for the U.S. Educational Institutions")
 st.write("""
-This app allows you to plot some aggregate financial data of the institutions in the US for some given categories of students.
+This app allows you to plot some aggregate financial data of the educational institutions in the US for some given categories of students.
 The data is taken from the Integrated Postsecondary Education Data System (IPEDS) of the US Department of Education.
          
 The data is preprocessed to EXCLUDE some institutions detailed as below:
