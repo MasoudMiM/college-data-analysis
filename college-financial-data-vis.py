@@ -2,12 +2,11 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from statistics import NormalDist
 import seaborn as sns
 
 st.title("Finances for private, not-for-profit institutions in the US")
 st.write("""
-This app allows you to plot some financial data of the institutions in the US for some given categories of students.
+This app allows you to plot some aggregate financial data of the institutions in the US for some given categories of students.
 The data is taken from the Integrated Postsecondary Education Data System (IPEDS) of the US Department of Education.
          
 The data is preprocessed to EXCLUDE some institutions detailed as below:
@@ -29,9 +28,9 @@ The data is preprocessed to EXCLUDE some institutions detailed as below:
 """)
 
 # Load CSV file
-uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
-if uploaded_file is not None:
-    df_orig = pd.read_csv(uploaded_file)
+csv_url = st.text_input("URL of the CSV file", "https://raw.githubusercontent.com/MasoudMiM/college-data-vis/main/finance_private_not_for_profite_inst.csv")
+if csv_url is not None:
+    df_orig = pd.read_csv(csv_url)
     
     df_sub = df_orig[~df_orig['ACT'].isin(['D', 'I', 'O'])]
     df_sub = df_sub[~df_sub['SECTOR'].isin([1, 5, 7])]
