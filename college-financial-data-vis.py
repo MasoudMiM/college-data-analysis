@@ -7,6 +7,7 @@ from plotly.subplots import make_subplots
 from scipy import stats
 
 st.set_page_config(layout="wide")
+st.rerun(minutes=5)
 
 st.title("Finances for the U.S. Educational Institutions")
 st.write("""
