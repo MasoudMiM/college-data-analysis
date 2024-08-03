@@ -45,7 +45,7 @@ pip install streamlit pandas numpy plotly scipy
 Navigate to the directory containing the Streamlit app and run:
 
 ```sh
-streamlit run streamlit_app.py
+streamlit run college-financial-vis-app.py
 ```
 
 ![streamlitprev](./assets/web_app_streamlit.gif)
@@ -77,7 +77,7 @@ pip install flask pandas numpy plotly scipy
 - On macOS/Linux: `export FLASK_ENV=development`
 3. Run the Flask application:
 ```sh
-python flask_app.py
+python college-financials-vis-app_flask.py
 ```
 
 4. Open a web browser and go to `http://127.0.0.1:5000/`
