@@ -1,8 +1,10 @@
 
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
+import numpy as np
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from scipy import stats
 
 st.set_page_config(layout="wide")
 
@@ -20,7 +22,7 @@ The data is preprocessed to EXCLUDE some institutions detailed as below:
     - 1 - Public, 4-year or above,
     - 5 - Public, 2-year,
     - 7 - Public, less-than 2-year
-- institutions that offer degrees with the following values, HLOFFER with following:
+- Institutions that offer degrees with the following values, HLOFFER with following:
     - 1	- Award of less than one academic year
     - 2	- At least 1, but less than 2 academic yrs
     - 3	- Associate's degree
@@ -49,31 +51,6 @@ if csv_url is not None:
                         'F2E012', 'F2E021', 'F2E022', 'F2E031', 'F2E032', 'F2E041', 'F2E042', \
                             'F2E051', 'F2E052', 'F2E061', 'F2E062']
 
-    # cols_mean = {"year" : 'YR', 'STABBR':' ', 
-    # 'F2A02': 'Total assets',
-    # 'F2A03' : 'Total liabilities',
-    # 'F2B01': 'Total revenues and investment return',
-    # 'F2B02': 'Total expenses', 
-    # 'F2B07': 'Net assets, end of the year',
-    # 'F2C07': 'Total student grants',
-    # 'F2D01': 'Tuition and fees - Total',
-    # 'F2D16': 'Total revenues and investment return - Total',
-    # 'F2E131': 'Total expenses-Total amount',
-    # 'F2E132': 'Total expenses-Salaries and wages',
-    # 'F2E133': 'Total expenses-Benefits',
-    # 'F2E134': 'Total expenses-Operation and maintenance of plant',
-    # 'F2E135': 'Total expenses-Depreciation',
-    # 'F2E011': 'Instruction-Total amount',
-    # 'F2E012': 'Instruction-Salaries and wages',
-    # 'F2E021': 'Research-Total amount',
-    # 'F2E022': 'Research-Salaries and wages',
-    # 'F2E041': 'Academic support-Total amount',
-    # 'F2E042': 'Academic support-Salaries and wages',
-    # 'F2E051': 'Student service-Total amount',
-    # 'F2E052': 'Student service-Salaries and wages',
-    # 'F2E061': 'Institutional support-Total amount',
-    # 'F2E062': 'Institutional support-Salaries and wages'}
-
     df_sub = df_sub[columns]
 
 
@@ -99,45 +76,93 @@ if csv_url is not None:
         df.loc[:, 'F2E012'] = df['F2E012'] / 1e6
         df.loc[:, 'F2D01'] = df['F2D01'] / 1e6
 
+        # Aggregate data
+        def aggregate_data_with_ci(df, column, confidence=0.95):
+            """
+            Aggregate data and calculate confidence intervals.
+            """
+            # Group by year and calculate mean
+            agg_df = df.groupby('YR')[column].agg(['mean', 'std', 'count']).reset_index()
+            
+            # Calculate confidence interval
+            # For 95% CI
+            z = stats.norm.ppf(0.975)
+            agg_df['ci'] = z * (agg_df['std'] / np.sqrt(agg_df['count']))
+        
+            return agg_df
+        
+        # Create subplots
+        fig = make_subplots(rows=3, cols=3, subplot_titles=[
+            'Total Assets (in million USD)', 
+            'Total Revenues (in million USD)', 
+            'Student Grants (in million USD)', 
+            'Total Expenses (in million USD)', 
+            'Student Service (in million USD)', 
+            'Total Liabilities (in million USD)', 
+            'Tuition and Fees (in million USD)', 
+            'Total Expenses - Salaries (in million USD)', 
+            'Instructional Salaries (in million USD)'
+        ])
 
-        # put all the plots as subplots in a single figure. i also ignore NaN values
-        sns.set(font_scale=0.75)
-        fig, axs = plt.subplots(3, 3, figsize=(15, 10))
-        # increase the vertical space between the subplots
-        fig.subplots_adjust(hspace=0.25)
-        fig.suptitle(f'Finances of the institutions [{subset} students] for {df.shape[0]} institutes in the state of {state_name}', y=0.93)
+        # Function to add line plots with confidence intervals
+        def add_line_trace_with_ci(ax, df, column, row, col, title):
+            aggregated_df = aggregate_data_with_ci(df, column)
+            fig.add_trace(
+                go.Scatter(
+                    x=aggregated_df['YR'],
+                    y=aggregated_df['mean'],
+                    mode='lines',
+                    name=title,
+                    line=dict(width=2),
+                    error_y=dict(
+                        type='data',
+                        array=aggregated_df['ci'],
+                        visible=True,
+                        #color='rgba(0,0,0,0.2)',  # Color of the error bars
+                        thickness=0.5,  # Thickness of the error bars
+                        width=1  # Width of the error bars (change this to adjust thickness)
+                    )
+                ),
+                row=row, col=col
+            )
 
-        sns.lineplot(data=df.dropna(), x='YR', y='F2A02', ax=axs[0, 0])
-        axs[0, 0].set_ylabel('Total Assets (in million USD)')
-        axs[0, 0].set_xlabel('Year')
-        sns.lineplot(data=df.dropna(), x='YR', y='F2D16', ax=axs[0, 1])
-        axs[0, 1].set_ylabel('Total Revenues (in million USD)') 
-        axs[0, 1].set_xlabel('Year')
-        sns.lineplot(data=df.dropna(), x='YR', y='F2C07', ax=axs[0, 2])
-        axs[0, 2].set_ylabel('Student Grants (in million USD)') 
-        axs[0, 2].set_xlabel('Year')
+        # Plot Total Assets with Confidence Interval
+        add_line_trace_with_ci(fig, df, 'F2A02', row=1, col=1, title='Total Assets')
+
+        # Plot Total Revenues with Confidence Interval
+        add_line_trace_with_ci(fig, df, 'F2D16', row=1, col=2, title='Total Revenues')
+
+        # Plot Student Grants with Confidence Interval
+        add_line_trace_with_ci(fig, df, 'F2C07', row=1, col=3, title='Student Grants')
+
+        # Plot Total Expenses with Confidence Interval
+        add_line_trace_with_ci(fig, df, 'F2B02', row=2, col=1, title='Total Expenses')
+
+        # Plot Student Service with Confidence Interval
+        add_line_trace_with_ci(fig, df, 'F2E051', row=2, col=2, title='Student Service')
+
+        # Plot Total Liabilities with Confidence Interval
+        add_line_trace_with_ci(fig, df, 'F2A03', row=2, col=3, title='Total Liabilities')
+
+        # Plot Tuition and Fees with Confidence Interval
+        add_line_trace_with_ci(fig, df, 'F2D01', row=3, col=1, title='Tuition and Fees')
+
+        # Plot Total Expenses - Salaries with Confidence Interval
+        add_line_trace_with_ci(fig, df, 'F2E132', row=3, col=2, title='Total Expenses - Salaries')
+
+        # Plot Instructional Salaries with Confidence Interval
+        add_line_trace_with_ci(fig, df, 'F2E012', row=3, col=3, title='Instructional Salaries')
 
 
-        sns.lineplot(data=df.dropna(), x='YR', y='F2B02', ax=axs[1, 0])
-        axs[1, 0].set_ylabel('Total Expenses (in million USD)') 
-        axs[1, 0].set_xlabel('Year')
-        sns.lineplot(data=df.dropna(), x='YR', y='F2E051', ax=axs[1, 1])
-        axs[1, 1].set_ylabel('Student Service (in million USD)') 
-        axs[1, 1].set_xlabel('Year')
-        sns.lineplot(data=df.dropna(), x='YR', y='F2A03', ax=axs[1, 2])
-        axs[1, 2].set_ylabel('Total Liabilities (in million USD)')
-        axs[1, 2].set_xlabel('Year')
-
-
-        sns.lineplot(data=df.dropna(), x='YR', y='F2D01', ax=axs[2, 0])
-        axs[2, 0].set_ylabel('Tuition and Fees (in million USD)') 
-        axs[2, 0].set_xlabel('Year')
-        sns.lineplot(data=df.dropna(), x='YR', y='F2E132', ax=axs[2, 1])
-        axs[2, 1].set_ylabel('Total Expenses - Salaries (in million USD)')
-        axs[2, 1].set_xlabel('Year')
-        sns.lineplot(data=df.dropna(), x='YR', y='F2E012', ax=axs[2, 2])
-        axs[2, 2].set_ylabel('Instructional Salaries (in million USD)')
-        axs[2, 2].set_xlabel('Year')
+        # Update layout to add titles and adjust spacing
+        fig.update_layout(
+            height=1000, 
+            width=1200, 
+            title_text=f'Finances of the institutions in category "{subset} students" for {df.dropna().shape[0]} institutes in the state of {state_name}</b>',
+            title_x=0.5,  # Center the title horizontally
+            title_xanchor='center',  # Anchor the title in the center
+            showlegend=False
+        )
 
         return fig
 
@@ -159,5 +184,10 @@ if csv_url is not None:
         elif instsz == '10,000 - 19,999':
             fig = plot_finances(df_sub_4[df_sub_4['STABBR'] == state], instsz, state)
         elif instsz == '20,000 and above':
-            fig = plot_finances(df_sub_5[df_sub_5['STABBR'] == state], instsz, state)             
-        st.pyplot(fig)
+            fig = plot_finances(df_sub_5[df_sub_5['STABBR'] == state], instsz, state)   
+
+        # Center the plot using Streamlit's layout features
+        col1, col2, col3 = st.columns([1, 10, 1])  # Adjust the proportions as needed
+
+        with col2:
+            st.plotly_chart(fig, use_container_width=True)          
