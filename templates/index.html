@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="home.css">
+    <title>Finances for U.S. Educational Institutions</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1 style="text-align:center;">Finances for the U.S. Educational Institutions</h1>
+    <p style="text-align:center;">
+        <p style="text-align:center;">This app allows you to plot some aggregate financial data of the educational institutions in the US for some given categories of students.
+        The data is taken from the Integrated Postsecondary Education Data System (IPEDS) of the US Department of Education.</p>
+        
+        <h5>The data is preprocessed to EXCLUDE some institutions detailed as below:</h5>
+        <p>- Institutions with status ACT as ('D', 'I', 'O'):</p>
+        <ul>
+            <li>- D	-	Delete out of business</li>
+            <li>- I	-	Inactive due to hurricane related problems</li>
+            <li>- O	-	Out-of-scope of IPEDS - not postsecondary</li>
+        </ul>
+        <p>- Public institutions, if there are any, so NO SECTOR with value</p>
+        <ul>
+            <li>- 1 - Public, 4-year or above</li>
+            <li>- 5 - Public, 2-year</li>    
+            <li>- 7 - Public, less-than 2-year</li>
+        </ul>
+        <p">- Institutions that offer degrees with the following values, HLOFFER with following</p>
+        <ul>
+            <li>- 1	- Award of less than one academic year</li>
+            <li>- 2	- At least 1, but less than 2 academic yrs</li>
+            <li>- 3	- Associate's degree</li>
+            <li>- 4	- At least 2, but less than 4 academic yrs</li>
+            <li>- -2	- Not applicable, first-professional only</li>
+            <li>- -3	- {Not available}</li>
+        </ul>
+    </p>
+    
+    <h2 style="text-align:center;">Select the State and Institution Size:</h2>
+    <form id="plot-form", style="text-align:center;">
+        <label for="state", style="text-align:center;">State:</label>
+        <select name="state" id="state", style="text-align:center;">
+            {% for state in states %}
+            <option value="{{ state }}">{{ state }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="instsz", style="text-align:center;">Inst. Size:</label>
+        <select name="instsz" id="instsz", style="text-align:center;">
+            {% for size in inst_sizes %}
+            <option value="{{ size }}">{{ size }}</option>
+            {% endfor %}
+        </select>
+        
+        <button type="submit", style="text-align:center;">Plot</button>
+    </form>
+    
+    <div id="plot", style="text-align:center;"></div>
+    
+    <script style="text-align:center;">
+        $(document).ready(function() {
+            $('#plot-form').submit(function(e) {
+                e.preventDefault();
+                console.log("Form submitted");
+                $.ajax({
+                    url: '/plot',
+                    method: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        console.log("Received response:", response);
+                        var graphData = JSON.parse(response.graphJSON);
+                        Plotly.newPlot('plot', graphData.data, graphData.layout);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error:", error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
