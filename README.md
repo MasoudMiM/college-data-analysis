@@ -47,7 +47,7 @@ Navigate to the directory containing the Streamlit app and run:
 ```sh
 streamlit run college-financial-vis-app.py
 ```
-See the online version [here]((https://masoudmim-college-data-vis-college-financial-vis-app-hncodw.streamlit.app/)).
+See the online version [here](https://masoudmim-college-data-vis-college-financial-vis-app-hncodw.streamlit.app/).
 
 ![streamlitprev](./assets/web_app_streamlit.gif)
 
