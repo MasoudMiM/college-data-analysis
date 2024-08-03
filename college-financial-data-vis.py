@@ -169,7 +169,7 @@ if csv_url is not None:
     # Select columns to plot
     inst_sizes = ['Under 1,000', '1,000 - 4,999', '5,000 - 9,999', '10,000 - 19,999', '20,000 and above']
     st.write("Select the State and Institution Size:")
-    state = st.selectbox("state:", options=df_sub['STABBR'].unique())
+    state = st.selectbox("State:", options=sorted(df_sub['STABBR'].unique()))
     st.write(f"Selected the category size:")
     instsz = st.selectbox("Inst. Size:", options=inst_sizes)
 
