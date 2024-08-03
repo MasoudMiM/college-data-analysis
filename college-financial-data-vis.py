@@ -35,7 +35,7 @@ The data is preprocessed to EXCLUDE some institutions detailed as below:
 # Load CSV file
 csv_url = st.text_input("URL of the CSV file", "https://raw.githubusercontent.com/MasoudMiM/college-data-vis/main/finance_private_not_for_profite_inst.csv")
 if csv_url is not None:
-    df_orig = pd.read_csv(csv_url, dtype={'EIN': str})
+    df_orig = pd.read_csv(csv_url)
     
     df_sub = df_orig[~df_orig['ACT'].isin(['D', 'I', 'O'])]
     df_sub = df_sub[~df_sub['SECTOR'].isin([1, 5, 7])]
