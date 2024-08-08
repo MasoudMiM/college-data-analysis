@@ -1,4 +1,4 @@
-# U.S. Higher Educational Institutions Financial Data Visualization
+# Financial Data Visualization for the U.S. higher education institutions
 
 This repository contains two versions of a web application that visualizes financial data for U.S. higher educational institutions. The data is sourced from the Integrated Postsecondary Education Data System (IPEDS) of the US Department of Education.
 
